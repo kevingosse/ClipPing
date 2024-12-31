@@ -19,18 +19,18 @@
 
     <Grid x:Name="GridOverlay">
         <Grid.Resources>
-            <Storyboard x:Name="EnterStoryboard">
+            <Storyboard x:Name="EnterStoryboard" Completed="EnterStoryboard_Completed">
                 <FadeInThemeAnimation Storyboard.TargetName="GridOverlay" Duration="0:0:0.1" />
             </Storyboard>
-            <Storyboard x:Name="ExitStoryboard">
+            <Storyboard x:Name="ExitStoryboard" Completed="ExitStoryboard_Completed">
                 <FadeOutThemeAnimation Storyboard.TargetName="GridOverlay" Duration="0:0:0.3" />
             </Storyboard>
         </Grid.Resources>
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" >
                 <LinearGradientBrush.GradientStops>
-                    <GradientStop Color="#50FFFF00" Offset="0" />
-                    <GradientStop Color="#00FFFF00" Offset=".1" />
+                    <GradientStop Color="#5000FF00" Offset="0" />
+                    <GradientStop Color="#0000FF00" Offset=".1" />
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
         </Grid.Background>

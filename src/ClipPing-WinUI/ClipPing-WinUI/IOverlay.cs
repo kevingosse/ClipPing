@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
-using Windows.Foundation;
+﻿using Windows.Foundation;
 
 namespace Kookiz.ClipPing;
 
 internal interface IOverlay
 {
-    Task ShowAsync(Rect area);
+    void Show(Rect area);
 }

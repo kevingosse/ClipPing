@@ -1,17 +1,14 @@
 ﻿using Kookiz.ClipPing.Overlays;
 using Microsoft.UI.Xaml;
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace Kookiz.ClipPing;
 
 public partial class App : Application
 {
-    private Window? m_window;
-    private IOverlay _overlay;
+    private IOverlay? _overlay;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -20,14 +17,11 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-
-        Clipboard.ContentChanged += Clipboard_ContentChanged;
     }
 
     private void Clipboard_ContentChanged(object? sender, object e)
     {
-        Debug.WriteLine("Clipboard_ContentChanged");
-        _ = ShowOverlay();
+        ShowOverlay();
     }
 
     /// <summary>
@@ -36,8 +30,7 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        m_window = new MainWindow();
-        m_window.Activate();
+        Clipboard.ContentChanged += Clipboard_ContentChanged;
         _overlay = LoadOverlay();
     }
 
@@ -47,10 +40,8 @@ public partial class App : Application
         return new TopOverlay();
     }
 
-    private async Task ShowOverlay()
+    private void ShowOverlay()
     {
-        //var overlay = LoadOverlay();
-
         var hwnd = NativeMethods.GetForegroundWindow();
 
         if (hwnd == IntPtr.Zero)
@@ -82,10 +73,6 @@ public partial class App : Application
         var dpi = NativeMethods.GetDpiForWindow(hwnd);
         double scale = 96.0 / dpi;
 
-        //scale = 1;
-
-        Debug.WriteLine($"Window: {windowWidth}x{windowHeight} DPI: {dpi} Scale: {scale}");
-
-        await _overlay.ShowAsync(new(rect.Left, rect.Top, windowWidth * scale, windowHeight * scale));
+        _overlay!.Show(new(rect.Left, rect.Top, windowWidth * scale, windowHeight * scale));
     }
 }
