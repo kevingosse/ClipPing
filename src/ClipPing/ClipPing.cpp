@@ -4,11 +4,13 @@
 
 // ReSharper disable CppCStyleCast
 #include <cstdint>
+#include <memory>
 
 #define NOMINMAX
 
 #include <windows.h>
 #include <shellapi.h>
+#include <commctrl.h>
 #include <gdiplus.h>
 
 #include "resource.h"
@@ -21,6 +23,7 @@
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "shcore.lib")
 #pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "version.lib")
 
 #define WM_TRAYICON     (WM_APP + 1)
 
@@ -33,10 +36,68 @@ struct AppState
 
 	explicit AppState(HINSTANCE h) : overlay(settings), hInstance(h) {}
 
+	static INT_PTR CALLBACK AboutDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (msg)
+		{
+		case WM_INITDIALOG:
+			{
+				wchar_t path[MAX_PATH];
+				GetModuleFileName(nullptr, path, MAX_PATH);
+
+				DWORD unused;
+				const auto size = GetFileVersionInfoSize(path, &unused);
+				if (size > 0)
+				{
+					auto buffer = std::make_unique<BYTE[]>(size);
+					if (GetFileVersionInfo(path, 0, size, buffer.get()))
+					{
+						VS_FIXEDFILEINFO* fileInfo = nullptr;
+						UINT len = 0;
+						if (VerQueryValue(buffer.get(), L"\\", (void**)&fileInfo, &len))
+						{
+							wchar_t version[64];
+							swprintf_s(version, L"Version %d.%d",
+								HIWORD(fileInfo->dwProductVersionMS),
+								LOWORD(fileInfo->dwProductVersionMS));
+							SetDlgItemText(hwnd, IDC_VERSION, version);
+						}
+					}
+				}
+			}
+			SetFocus(GetDlgItem(hwnd, IDOK));
+			return FALSE;
+
+		case WM_NOTIFY:
+			{
+				const auto nmhdr = (NMHDR*)lParam;
+				if ((nmhdr->idFrom == IDC_LNK_TWITTER || nmhdr->idFrom == IDC_LNK_GITHUB)
+					&& (nmhdr->code == NM_CLICK || nmhdr->code == NM_RETURN))
+				{
+					const auto link = (NMLINK*)lParam;
+					ShellExecute(hwnd, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
+					return TRUE;
+				}
+			}
+			break;
+
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+			{
+				EndDialog(hwnd, LOWORD(wParam));
+				return TRUE;
+			}
+			break;
+		}
+
+		return FALSE;
+	}
+
 	static void ShowTrayMenu(HWND hwnd)
 	{
 		const auto menu = CreatePopupMenu();
 		AppendMenu(menu, MF_STRING, IDM_SETTINGS, L"Settings...");
+		AppendMenu(menu, MF_STRING, IDM_ABOUT, L"About...");
 		AppendMenu(menu, MF_SEPARATOR, 0, nullptr);
 		AppendMenu(menu, MF_STRING, IDM_EXIT, L"Exit");
 
@@ -118,6 +179,10 @@ struct AppState
 			else if (LOWORD(wParam) == IDM_SETTINGS)
 			{
 				app->settings.ShowDialog(hwnd, app->hInstance, app->overlay);
+			}
+			else if (LOWORD(wParam) == IDM_ABOUT)
+			{
+				DialogBox(app->hInstance, MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
 			}
 
 			return 0;
