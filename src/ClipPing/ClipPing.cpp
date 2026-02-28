@@ -9,6 +9,7 @@
 
 #include <windows.h>
 #include <shellapi.h>
+#include <commctrl.h>
 #include <gdiplus.h>
 
 #include "resource.h"
@@ -33,10 +34,39 @@ struct AppState
 
 	explicit AppState(HINSTANCE h) : overlay(settings), hInstance(h) {}
 
+	static INT_PTR CALLBACK AboutDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (msg)
+		{
+		case WM_NOTIFY:
+			{
+				const auto nmhdr = (NMHDR*)lParam;
+				if (nmhdr->code == NM_CLICK || nmhdr->code == NM_RETURN)
+				{
+					const auto link = (NMLINK*)lParam;
+					ShellExecute(nullptr, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
+					return TRUE;
+				}
+			}
+			break;
+
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+			{
+				EndDialog(hwnd, LOWORD(wParam));
+				return TRUE;
+			}
+			break;
+		}
+
+		return FALSE;
+	}
+
 	static void ShowTrayMenu(HWND hwnd)
 	{
 		const auto menu = CreatePopupMenu();
 		AppendMenu(menu, MF_STRING, IDM_SETTINGS, L"Settings...");
+		AppendMenu(menu, MF_STRING, IDM_ABOUT, L"About...");
 		AppendMenu(menu, MF_SEPARATOR, 0, nullptr);
 		AppendMenu(menu, MF_STRING, IDM_EXIT, L"Exit");
 
@@ -118,6 +148,10 @@ struct AppState
 			else if (LOWORD(wParam) == IDM_SETTINGS)
 			{
 				app->settings.ShowDialog(hwnd, app->hInstance, app->overlay);
+			}
+			else if (LOWORD(wParam) == IDM_ABOUT)
+			{
+				DialogBox(app->hInstance, MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
 			}
 
 			return 0;
