@@ -18,7 +18,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64
+        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
