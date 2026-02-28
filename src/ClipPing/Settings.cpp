@@ -23,7 +23,13 @@ bool Settings::GetAutoStart()
 	}
 
 	wchar_t exePath[MAX_PATH];
-	GetModuleFileName(nullptr, exePath, MAX_PATH);
+	const DWORD exeLen = GetModuleFileName(nullptr, exePath, MAX_PATH);
+
+	if (exeLen == 0 || exeLen >= MAX_PATH)
+	{
+		RegCloseKey(hKey);
+		return false;
+	}
 
 	wchar_t regValue[MAX_PATH];
 	DWORD size = sizeof(regValue);
@@ -47,8 +53,15 @@ void Settings::SetAutoStart(bool enable)
 	if (enable)
 	{
 		wchar_t exePath[MAX_PATH];
-		GetModuleFileName(nullptr, exePath, MAX_PATH);
-		RegSetValueEx(hKey, kValueName, 0, REG_SZ, (const BYTE*)exePath, (DWORD)((wcslen(exePath) + 1) * sizeof(wchar_t)));
+		const DWORD exeLen = GetModuleFileName(nullptr, exePath, MAX_PATH);
+		
+		if (exeLen == 0 || exeLen >= MAX_PATH)
+		{
+			RegCloseKey(hKey);
+			return;
+		}
+
+		RegSetValueEx(hKey, kValueName, 0, REG_SZ, (const BYTE*)exePath, (DWORD)((exeLen + 1) * sizeof(wchar_t)));
 	}
 	else
 	{
