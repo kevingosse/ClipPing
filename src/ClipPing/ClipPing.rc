@@ -63,11 +63,11 @@ FONT 9, "Segoe UI"
 BEGIN
     ICON            IDI_CLIPPING, -1, 14, 14, 20, 20
     LTEXT           "ClipPing", -1, 42, 10, 100, 10
-    LTEXT           "Version 2.0", -1, 42, 22, 100, 8
+    LTEXT           "", IDC_VERSION, 42, 22, 100, 8
     LTEXT           "Visual clipboard notification for Windows", -1, 14, 42, 172, 8
     LTEXT           "Author: Kevin Gosse", -1, 14, 56, 172, 8
-    CONTROL         "<a href=""https://twitter.com/KooKiz"">Twitter: @KooKiz</a>", -1, "SysLink", 0, 14, 70, 172, 10
-    CONTROL         "<a href=""https://github.com/kevingosse/ClipPing"">GitHub: kevingosse/ClipPing</a>", -1, "SysLink", 0, 14, 82, 172, 10
+    CONTROL         "Twitter: <a href=""https://twitter.com/KooKiz"">@KooKiz</a>", IDC_LNK_TWITTER, "SysLink", WS_TABSTOP, 14, 70, 172, 10
+    CONTROL         "GitHub: <a href=""https://github.com/kevingosse/ClipPing"">kevingosse/ClipPing</a>", IDC_LNK_GITHUB, "SysLink", WS_TABSTOP, 14, 82, 172, 10
     DEFPUSHBUTTON   "OK", IDOK, 75, 96, 50, 14
 END
 

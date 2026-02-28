@@ -4,6 +4,7 @@
 
 // ReSharper disable CppCStyleCast
 #include <cstdint>
+#include <memory>
 
 #define NOMINMAX
 
@@ -22,6 +23,7 @@
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "shcore.lib")
 #pragma comment(lib, "shell32.lib")
+#pragma comment(lib, "version.lib")
 
 #define WM_TRAYICON     (WM_APP + 1)
 
@@ -38,13 +40,42 @@ struct AppState
 	{
 		switch (msg)
 		{
+		case WM_INITDIALOG:
+			{
+				wchar_t path[MAX_PATH];
+				GetModuleFileName(nullptr, path, MAX_PATH);
+
+				DWORD unused;
+				const auto size = GetFileVersionInfoSize(path, &unused);
+				if (size > 0)
+				{
+					auto buffer = std::make_unique<BYTE[]>(size);
+					if (GetFileVersionInfo(path, 0, size, buffer.get()))
+					{
+						VS_FIXEDFILEINFO* fileInfo = nullptr;
+						UINT len = 0;
+						if (VerQueryValue(buffer.get(), L"\\", (void**)&fileInfo, &len))
+						{
+							wchar_t version[64];
+							swprintf_s(version, L"Version %d.%d",
+								HIWORD(fileInfo->dwProductVersionMS),
+								LOWORD(fileInfo->dwProductVersionMS));
+							SetDlgItemText(hwnd, IDC_VERSION, version);
+						}
+					}
+				}
+			}
+			SetFocus(GetDlgItem(hwnd, IDOK));
+			return FALSE;
+
 		case WM_NOTIFY:
 			{
 				const auto nmhdr = (NMHDR*)lParam;
-				if (nmhdr->code == NM_CLICK || nmhdr->code == NM_RETURN)
+				if ((nmhdr->idFrom == IDC_LNK_TWITTER || nmhdr->idFrom == IDC_LNK_GITHUB)
+					&& (nmhdr->code == NM_CLICK || nmhdr->code == NM_RETURN))
 				{
 					const auto link = (NMLINK*)lParam;
-					ShellExecute(nullptr, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
+					ShellExecute(hwnd, L"open", link->item.szUrl, nullptr, nullptr, SW_SHOWNORMAL);
 					return TRUE;
 				}
 			}

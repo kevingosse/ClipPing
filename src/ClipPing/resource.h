@@ -13,3 +13,6 @@
 #define IDC_CHK_AUTOSTART 205
 
 #define IDD_ABOUT       300
+#define IDC_LNK_TWITTER 301
+#define IDC_LNK_GITHUB  302
+#define IDC_VERSION     303
