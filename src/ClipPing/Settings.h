@@ -24,6 +24,9 @@ public:
 	void Save();
 	bool ShowDialog(HWND parent, HINSTANCE instance, Overlay& overlay);
 
+	static bool GetAutoStart();
+	static void SetAutoStart(bool enable);
+
 	COLORREF overlayColor = RGB(255, 0, 0);
 	OverlayType overlayType = OverlayTop;
 
@@ -34,6 +37,7 @@ private:
 		Overlay* overlay;
 		COLORREF savedColor = 0;
 		OverlayType savedType = OverlayTop;
+		bool savedAutoStart = false;
 
 		DlgContext(Settings* s, Overlay* o) : settings(s), overlay(o) {}
 	};
