@@ -24,6 +24,9 @@ public:
 	void Save();
 	bool ShowDialog(HWND parent, HINSTANCE instance, Overlay& overlay);
 
+	static bool GetAutoStart();
+	static void SetAutoStart(bool enable);
+
 	COLORREF overlayColor = RGB(255, 0, 0);
 	OverlayType overlayType = OverlayTop;
 

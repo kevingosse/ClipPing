@@ -9,6 +9,67 @@
 #include <shlobj.h>
 
 #pragma comment(lib, "comdlg32.lib")
+#pragma comment(lib, "advapi32.lib")
+
+static const wchar_t* const kRunKey = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+static const wchar_t* const kValueName = L"ClipPing";
+
+bool Settings::GetAutoStart()
+{
+	HKEY hKey = nullptr;
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, kRunKey, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+	{
+		return false;
+	}
+
+	wchar_t exePath[MAX_PATH];
+	const DWORD exeLen = GetModuleFileName(nullptr, exePath, MAX_PATH);
+
+	if (exeLen == 0 || exeLen >= MAX_PATH)
+	{
+		RegCloseKey(hKey);
+		return false;
+	}
+
+	wchar_t regValue[MAX_PATH];
+	DWORD size = sizeof(regValue);
+	DWORD type = 0;
+	const bool exists = RegQueryValueEx(hKey, kValueName, nullptr, &type, (BYTE*)regValue, &size) == ERROR_SUCCESS
+		&& type == REG_SZ
+		&& _wcsicmp(regValue, exePath) == 0;
+
+	RegCloseKey(hKey);
+	return exists;
+}
+
+void Settings::SetAutoStart(bool enable)
+{
+	HKEY hKey = nullptr;
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, kRunKey, 0, KEY_WRITE, &hKey) != ERROR_SUCCESS)
+	{
+		return;
+	}
+
+	if (enable)
+	{
+		wchar_t exePath[MAX_PATH];
+		const DWORD exeLen = GetModuleFileName(nullptr, exePath, MAX_PATH);
+		
+		if (exeLen == 0 || exeLen >= MAX_PATH)
+		{
+			RegCloseKey(hKey);
+			return;
+		}
+
+		RegSetValueEx(hKey, kValueName, 0, REG_SZ, (const BYTE*)exePath, (DWORD)((exeLen + 1) * sizeof(wchar_t)));
+	}
+	else
+	{
+		RegDeleteValue(hKey, kValueName);
+	}
+
+	RegCloseKey(hKey);
+}
 
 void Settings::EnsureIniPath()
 {
@@ -92,6 +153,8 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 		ctx->savedColor = ctx->settings->overlayColor;
 		ctx->savedType = ctx->settings->overlayType;
 
+		CheckDlgButton(dialog, IDC_CHK_AUTOSTART, GetAutoStart() ? BST_CHECKED : BST_UNCHECKED);
+
 		const auto hCombo = GetDlgItem(dialog, IDC_CMB_OVERLAY);
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Top");
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Border");
@@ -170,6 +233,8 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 
 		case IDOK:
 		{
+			const bool autoStart = IsDlgButtonChecked(dialog, IDC_CHK_AUTOSTART) == BST_CHECKED;
+			SetAutoStart(autoStart);
 			ctx->settings->Save();
 			EndDialog(dialog, IDOK);
 			return TRUE;
