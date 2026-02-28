@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: KevinGosse.ClipPing
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Kevin Gosse
+PublisherUrl: https://github.com/kevingosse
+PackageName: ClipPing
+PackageUrl: https://github.com/kevingosse/ClipPing
+License: MIT
+LicenseUrl: https://github.com/kevingosse/ClipPing/blob/master/LICENSE
+ShortDescription: Visual clipboard notification for Windows
+Description: >-
+  ClipPing displays a visual notification in the active window whenever the
+  clipboard is updated. It sits in the system tray and supports customizable
+  overlay colors and styles. Requires Windows 10 version 1607 or later.
+Tags:
+  - clipboard
+  - notification
+  - utility
+  - tray
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

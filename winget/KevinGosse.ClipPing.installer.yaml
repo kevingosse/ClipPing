@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+
+PackageIdentifier: KevinGosse.ClipPing
+PackageVersion: 2.0.0
+InstallerType: portable
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/kevingosse/ClipPing/releases/download/v2.0.0/ClipPing.exe
+    InstallerSha256: # Replace with actual SHA256 after the release is published
+    Commands:
+      - ClipPing
+ManifestType: installer
+ManifestVersion: 1.9.0
