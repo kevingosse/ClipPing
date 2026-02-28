@@ -152,9 +152,8 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 
 		ctx->savedColor = ctx->settings->overlayColor;
 		ctx->savedType = ctx->settings->overlayType;
-		ctx->savedAutoStart = GetAutoStart();
 
-		CheckDlgButton(dialog, IDC_CHK_AUTOSTART, ctx->savedAutoStart ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(dialog, IDC_CHK_AUTOSTART, GetAutoStart() ? BST_CHECKED : BST_UNCHECKED);
 
 		const auto hCombo = GetDlgItem(dialog, IDC_CMB_OVERLAY);
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Top");
