@@ -67,7 +67,20 @@ void Overlay::UpdateAlpha(int32_t alpha) const
 	alpha = std::clamp(alpha, 0, 255);
 
 	const auto deviceContext = GetDC(nullptr);
+
+	if (!deviceContext)
+	{
+		return;
+	}
+
 	const auto memoryDeviceContext = CreateCompatibleDC(deviceContext);
+
+	if (!memoryDeviceContext)
+	{
+		ReleaseDC(nullptr, deviceContext);
+		return;
+	}
+
 	const auto old = (HBITMAP)SelectObject(memoryDeviceContext, _bitmap);
 
 	POINT ptSrc = { 0, 0 };

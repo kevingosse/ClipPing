@@ -4,12 +4,6 @@
 
 // ReSharper disable CppCStyleCast
 #include <cstdint>
-#ifndef UNICODE
-#define UNICODE
-#endif
-#ifndef _UNICODE
-#define _UNICODE
-#endif
 
 #define NOMINMAX
 
@@ -51,7 +45,10 @@ struct AppState
 		POINT pt;
 		GetCursorPos(&pt);
 		TrackPopupMenu(menu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hwnd, nullptr);
-
+		
+		// For notification icon context menus, the Win32 guidance is to call PostMessage(hwnd, WM_NULL, 0, 0) 
+		// to ensure the menu reliably dismisses when the user clicks elsewhere.
+		PostMessage(hwnd, WM_NULL, 0, 0);
 		DestroyMenu(menu);
 	}
 

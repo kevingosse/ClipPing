@@ -40,8 +40,12 @@ void Settings::Load()
 
 	std::wstring colorBuf(16, L'\0');
 	GetPrivateProfileString(L"Overlay", L"Color", L"FF0000", colorBuf.data(), (DWORD)colorBuf.size(), _iniPath.c_str());
-	const auto hex = std::stoul(colorBuf, nullptr, 16);
-	overlayColor = RGB((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+	try
+	{
+		const auto hex = std::stoul(colorBuf, nullptr, 16);
+		overlayColor = RGB((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+	}
+	catch (...) {}
 
 	const auto type = GetPrivateProfileInt(L"Overlay", L"Type", 0, _iniPath.c_str());
 	
