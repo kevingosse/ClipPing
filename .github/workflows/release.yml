@@ -18,12 +18,12 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64
+        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64 /p:OutDir=${{ github.workspace }}\build\
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: src\ClipPing\x64\Release\ClipPing.exe
+          files: build\ClipPing.exe
           generate_release_notes: true
 
   # Uncomment after your first WinGet submission is merged.
