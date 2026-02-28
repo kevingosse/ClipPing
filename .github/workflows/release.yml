@@ -23,7 +23,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build\ClipPing.exe
+          files: build/ClipPing.exe
           generate_release_notes: true
 
   # Uncomment after your first WinGet submission is merged.
