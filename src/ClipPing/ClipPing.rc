@@ -19,7 +19,7 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName",      "Kevin Gosse"
-            VALUE "FileDescription",  "Visual clipboard notification for Windows"
+            VALUE "FileDescription",  "ClipPing"
             VALUE "FileVersion",      "2.0.0.0"
             VALUE "InternalName",     "ClipPing"
             VALUE "OriginalFilename", "ClipPing.exe"
@@ -34,26 +34,30 @@ BEGIN
     END
 END
 
-IDD_SETTINGS DIALOGEX 0, 0, 250, 148
+IDD_SETTINGS DIALOGEX 0, 0, 250, 203
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "ClipPing Settings"
 FONT 9, "Segoe UI"
 BEGIN
-    GROUPBOX        "Appearance", -1, 7, 7, 236, 72
-    LTEXT           "Overlay color:", -1, 16, 22, 50, 8
-    PUSHBUTTON      "Choose...", IDC_BTN_COLOR, 70, 20, 50, 14
-    CONTROL         "", IDC_COLOR_PREVIEW, "Static", SS_OWNERDRAW | WS_BORDER, 126, 20, 30, 14
+    LTEXT           "ClipPing displays a brief visual notification whenever you copy something to the clipboard.", -1, 7, 7, 236, 18
+    LTEXT           "ClipPing adds this icon to the system tray next to the clock. Double-click it to open these settings.", -1, 7, 32, 215, 18
+    ICON            IDI_CLIPPING, -1, 223, 30, 20, 20
 
-    LTEXT           "Overlay type:", -1, 16, 41, 50, 8
-    COMBOBOX        IDC_CMB_OVERLAY, 70, 39, 86, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Appearance", -1, 7, 62, 236, 72
+    LTEXT           "Overlay color:", -1, 16, 77, 50, 8
+    PUSHBUTTON      "Choose...", IDC_BTN_COLOR, 70, 75, 50, 14
+    CONTROL         "", IDC_COLOR_PREVIEW, "Static", SS_OWNERDRAW | WS_BORDER, 126, 75, 30, 14
 
-    PUSHBUTTON      "Preview", IDC_BTN_PREVIEW, 16, 58, 50, 14
+    LTEXT           "Overlay type:", -1, 16, 96, 50, 8
+    COMBOBOX        IDC_CMB_OVERLAY, 70, 94, 86, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 
-    GROUPBOX        "General", -1, 7, 86, 236, 28
-    AUTOCHECKBOX    "Start with Windows", IDC_CHK_AUTOSTART, 16, 98, 80, 10
+    PUSHBUTTON      "Preview", IDC_BTN_PREVIEW, 16, 113, 50, 14
 
-    DEFPUSHBUTTON   "OK", IDOK, 139, 126, 50, 14
-    PUSHBUTTON      "Cancel", IDCANCEL, 193, 126, 50, 14
+    GROUPBOX        "General", -1, 7, 141, 236, 28
+    AUTOCHECKBOX    "Start with Windows", IDC_CHK_AUTOSTART, 16, 153, 80, 10
+
+    PUSHBUTTON      "Exit ClipPing", IDC_BTN_EXIT, 7, 181, 60, 14
+    DEFPUSHBUTTON   "OK", IDOK, 193, 181, 50, 14
 END
 
 IDD_ABOUT DIALOGEX 0, 0, 200, 118

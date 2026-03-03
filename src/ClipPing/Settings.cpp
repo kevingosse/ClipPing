@@ -99,6 +99,8 @@ void Settings::Load()
 		return;
 	}
 
+	isFirstLaunch = GetFileAttributes(_iniPath.c_str()) == INVALID_FILE_ATTRIBUTES;
+
 	std::wstring colorBuf(16, L'\0');
 	GetPrivateProfileString(L"Overlay", L"Color", L"FF0000", colorBuf.data(), (DWORD)colorBuf.size(), _iniPath.c_str());
 	try
@@ -153,7 +155,8 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 		ctx->savedColor = ctx->settings->overlayColor;
 		ctx->savedType = ctx->settings->overlayType;
 
-		CheckDlgButton(dialog, IDC_CHK_AUTOSTART, GetAutoStart() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(dialog, IDC_CHK_AUTOSTART,
+			(ctx->settings->isFirstLaunch || GetAutoStart()) ? BST_CHECKED : BST_UNCHECKED);
 
 		const auto hCombo = GetDlgItem(dialog, IDC_CMB_OVERLAY);
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Top");
@@ -240,11 +243,22 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 			return TRUE;
 		}
 
-		case IDCANCEL:
-			ctx->settings->overlayColor = ctx->savedColor;
-			ctx->settings->overlayType = ctx->savedType;
+		case IDC_BTN_EXIT:
+		{
+			const auto parent = GetParent(dialog);
 			EndDialog(dialog, IDCANCEL);
+			PostMessage(parent, WM_COMMAND, IDM_EXIT, 0);
 			return TRUE;
+		}
+
+		case IDCANCEL:
+		{
+			const bool autoStart = IsDlgButtonChecked(dialog, IDC_CHK_AUTOSTART) == BST_CHECKED;
+			SetAutoStart(autoStart);
+			ctx->settings->Save();
+			EndDialog(dialog, IDOK);
+			return TRUE;
+		}
 		}
 		break;
 	}

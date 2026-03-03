@@ -234,6 +234,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 	AddClipboardFormatListener(hwndListener);
 	app.InitTrayIcon(hwndListener);
 
+	if (app.settings.isFirstLaunch)
+	{
+		PostMessage(hwndListener, WM_COMMAND, IDM_SETTINGS, 0);
+	}
+
 	MSG msg;
 	while (GetMessage(&msg, nullptr, 0, 0) > 0)
 	{
