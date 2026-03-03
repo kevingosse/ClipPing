@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Release
+        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build installer
+        run: iscc /DMyAppVersion=0.0.0 installer.iss
+
+      - name: Run installer
+        run: build\ClipPing-Setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+
+      - name: Verify installation
+        shell: pwsh
+        run: |
+          $exePath = "$env:LOCALAPPDATA\Programs\ClipPing\ClipPing.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "ClipPing.exe not found at $exePath"
+            exit 1
+          }
+          Write-Host "ClipPing.exe found at $exePath"
+
+      - name: Launch ClipPing
+        shell: pwsh
+        run: |
+          Start-Process "$env:LOCALAPPDATA\Programs\ClipPing\ClipPing.exe"
+          Start-Sleep -Seconds 2
+
+      - name: Verify process is running
+        shell: pwsh
+        run: |
+          $proc = Get-Process -Name ClipPing -ErrorAction SilentlyContinue
+          if (-not $proc) {
+            Write-Error "ClipPing process is not running"
+            exit 1
+          }
+          Write-Host "ClipPing is running (PID: $($proc.Id))"
+
+      - name: Verify mutex exists
+        shell: pwsh
+        run: |
+          $mutexName = "Local\ClipPing_SingleInstance"
+          $mutex = $null
+          $exists = [System.Threading.Mutex]::TryOpenExisting($mutexName, [ref]$mutex)
+          if (-not $exists) {
+            Write-Error "Mutex '$mutexName' not found"
+            exit 1
+          }
+          $mutex.Dispose()
+          Write-Host "Mutex '$mutexName' exists"
+
+      - name: Verify single instance
+        shell: pwsh
+        run: |
+          $proc = Start-Process "$env:LOCALAPPDATA\Programs\ClipPing\ClipPing.exe" -PassThru
+          $exited = $proc.WaitForExit(5000)
+          if (-not $exited) {
+            Write-Error "Second instance did not exit within 5 seconds"
+            $proc.Kill()
+            exit 1
+          }
+          $count = (Get-Process -Name ClipPing -ErrorAction SilentlyContinue).Count
+          if ($count -ne 1) {
+            Write-Error "Expected 1 ClipPing process, found $count"
+            exit 1
+          }
+          Write-Host "Single instance enforced: second instance exited (code $($proc.ExitCode)), 1 process running"
+
+      - name: Stop ClipPing
+        if: always()
+        run: taskkill /F /IM ClipPing.exe 2>nul || exit /b 0
