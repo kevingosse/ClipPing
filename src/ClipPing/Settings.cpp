@@ -136,6 +136,12 @@ void Settings::Save()
 
 bool Settings::ShowDialog(HWND parent, HINSTANCE instance, Overlay& overlay)
 {
+	if (_dialogHwnd)
+	{
+		SetForegroundWindow(_dialogHwnd);
+		return false;
+	}
+
 	_dlgColor = overlayColor;
 	DlgContext ctx(this, &overlay);
 	return DialogBoxParam(instance, MAKEINTRESOURCE(IDD_SETTINGS), parent, DlgProc, (LPARAM)&ctx) == IDOK;
@@ -151,6 +157,7 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 	{
 		ctx = (DlgContext*)lParam;
 		SetWindowLongPtr(dialog, DWLP_USER, lParam);
+		ctx->settings->_dialogHwnd = dialog;
 
 		CheckDlgButton(dialog, IDC_CHK_AUTOSTART,
 			(ctx->settings->isFirstLaunch || GetAutoStart()) ? BST_CHECKED : BST_UNCHECKED);
@@ -165,6 +172,15 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Right");
 		SendMessage(hCombo, CB_SETCURSEL, (WPARAM)ctx->settings->overlayType, 0);
 
+		return TRUE;
+	}
+
+	case WM_DESTROY:
+	{
+		if (ctx)
+		{
+			ctx->settings->_dialogHwnd = nullptr;
+		}
 		return TRUE;
 	}
 

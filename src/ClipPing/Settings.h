@@ -44,5 +44,6 @@ private:
 	void EnsureIniPath();
 
 	COLORREF _dlgColor = 0;
+	HWND _dialogHwnd = nullptr;
 	std::wstring _iniPath;
 };
