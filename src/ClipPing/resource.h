@@ -11,6 +11,7 @@
 #define IDC_CMB_OVERLAY 203
 #define IDC_BTN_PREVIEW 204
 #define IDC_CHK_AUTOSTART 205
+#define IDC_BTN_EXIT    206
 
 #define IDD_ABOUT       300
 #define IDC_LNK_TWITTER 301

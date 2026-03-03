@@ -27,6 +27,7 @@ public:
 	static bool GetAutoStart();
 	static void SetAutoStart(bool enable);
 
+	bool isFirstLaunch = false;
 	COLORREF overlayColor = RGB(255, 0, 0);
 	OverlayType overlayType = OverlayTop;
 
@@ -35,8 +36,6 @@ private:
 	{
 		Settings* settings;
 		Overlay* overlay;
-		COLORREF savedColor = 0;
-		OverlayType savedType = OverlayTop;
 
 		DlgContext(Settings* s, Overlay* o) : settings(s), overlay(o) {}
 	};
