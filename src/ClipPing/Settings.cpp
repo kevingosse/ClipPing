@@ -31,13 +31,25 @@ bool Settings::GetAutoStart()
 		return false;
 	}
 
-	wchar_t regValue[MAX_PATH];
+	wchar_t regValue[MAX_PATH + 2];
 	DWORD size = sizeof(regValue);
 	DWORD type = 0;
-	const bool exists = RegQueryValueEx(hKey, kValueName, nullptr, &type, (BYTE*)regValue, &size) == ERROR_SUCCESS
-		&& type == REG_SZ
-		&& _wcsicmp(regValue, exePath) == 0;
+	if (RegQueryValueEx(hKey, kValueName, nullptr, &type, (BYTE*)regValue, &size) != ERROR_SUCCESS || type != REG_SZ)
+	{
+		RegCloseKey(hKey);
+		return false;
+	}
 
+	// Strip surrounding quotes if present
+	const wchar_t* valuePath = regValue;
+	size_t valueLen = wcslen(regValue);
+	if (valueLen >= 2 && regValue[0] == L'"' && regValue[valueLen - 1] == L'"')
+	{
+		regValue[valueLen - 1] = L'\0';
+		valuePath = regValue + 1;
+	}
+
+	const bool exists = _wcsicmp(valuePath, exePath) == 0;
 	RegCloseKey(hKey);
 	return exists;
 }
@@ -61,7 +73,10 @@ void Settings::SetAutoStart(bool enable)
 			return;
 		}
 
-		RegSetValueEx(hKey, kValueName, 0, REG_SZ, (const BYTE*)exePath, (DWORD)((exeLen + 1) * sizeof(wchar_t)));
+		wchar_t quoted[MAX_PATH + 3];
+		swprintf_s(quoted, L"\"%s\"", exePath);
+		const DWORD quotedLen = (DWORD)((wcslen(quoted) + 1) * sizeof(wchar_t));
+		RegSetValueEx(hKey, kValueName, 0, REG_SZ, (const BYTE*)quoted, quotedLen);
 	}
 	else
 	{

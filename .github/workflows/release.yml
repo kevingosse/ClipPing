@@ -18,15 +18,29 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64 /p:OutDir=${{ github.workspace }}\build\
+        run: msbuild src\ClipPing.sln /p:Configuration=Release /p:Platform=x64
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Extract version from tag
+        id: version
+        shell: bash
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build installer
+        run: iscc /DMyAppVersion=${{ steps.version.outputs.version }} installer.iss
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/ClipPing.exe
+          files: |
+            build/ClipPing.exe
+            build/ClipPing-Setup.exe
           generate_release_notes: true
 
   winget:
+    if: false # Re-enable after manually submitting the inno manifest to winget-pkgs for v2.2.0
     needs: build
     runs-on: windows-latest
     steps:
@@ -43,7 +57,7 @@ jobs:
       - name: Update WinGet package
         shell: pwsh
         run: |
-          $url = "https://github.com/kevingosse/ClipPing/releases/download/${{ github.ref_name }}/ClipPing.exe"
+          $url = "https://github.com/kevingosse/ClipPing/releases/download/${{ github.ref_name }}/ClipPing-Setup.exe|x64"
           .\wingetcreate.exe update KevinGosse.ClipPing `
             --version ${{ steps.version.outputs.version }} `
             --urls $url `
