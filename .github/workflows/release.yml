@@ -47,4 +47,5 @@ jobs:
           .\wingetcreate.exe update KevinGosse.ClipPing `
             --version ${{ steps.version.outputs.version }} `
             --urls $url `
-            --token ${{ secrets.WINGET_PAT }}
+            --token ${{ secrets.WINGET_PAT }} `
+            --submit
