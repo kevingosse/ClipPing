@@ -198,6 +198,24 @@ struct AppState
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 {
+	// Single-instance check: if another instance is already running,
+	// signal it to open its settings window and exit.
+	const auto mutex = CreateMutex(nullptr, FALSE, L"ClipPing_SingleInstance");
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		const auto existingWnd = FindWindow(L"ClipPingListener", nullptr);
+		if (existingWnd)
+		{
+			DWORD pid = 0;
+			GetWindowThreadProcessId(existingWnd, &pid);
+			AllowSetForegroundWindow(pid);
+			PostMessage(existingWnd, WM_COMMAND, IDM_SETTINGS, 0);
+		}
+
+		CloseHandle(mutex);
+		return 0;
+	}
+
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
 	AppState app(hInstance);
@@ -251,5 +269,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
 
+	CloseHandle(mutex);
 	return (int)msg.wParam;
 }
