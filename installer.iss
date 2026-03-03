@@ -3,7 +3,7 @@
 #endif
 
 [Setup]
-AppId={{E5A2B2A0-3D6F-4E8C-9F1A-7C5D8E2F4A6B}
+AppId={{E5A2B2A0-3D6F-4E8C-9F1A-7C5D8E2F4A6B}}
 AppName=ClipPing
 AppVersion={#MyAppVersion}
 AppVerName=ClipPing
@@ -44,19 +44,19 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: 
 procedure MigrateAutoStartEntry();
 var
   OldValue: String;
-  NewExePath: String;
+  QuotedPath: String;
 begin
-  NewExePath := ExpandConstant('{app}\ClipPing.exe');
+  QuotedPath := '"' + ExpandConstant('{app}\ClipPing.exe') + '"';
 
   if RegQueryStringValue(HKEY_CURRENT_USER,
     'Software\Microsoft\Windows\CurrentVersion\Run',
     'ClipPing', OldValue) then
   begin
-    if CompareText(OldValue, NewExePath) <> 0 then
+    if CompareText(OldValue, QuotedPath) <> 0 then
     begin
       RegWriteStringValue(HKEY_CURRENT_USER,
         'Software\Microsoft\Windows\CurrentVersion\Run',
-        'ClipPing', NewExePath);
+        'ClipPing', QuotedPath);
     end;
   end;
 end;
