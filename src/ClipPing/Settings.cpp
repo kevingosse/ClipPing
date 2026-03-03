@@ -152,11 +152,9 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 		ctx = (DlgContext*)lParam;
 		SetWindowLongPtr(dialog, DWLP_USER, lParam);
 
-		ctx->savedColor = ctx->settings->overlayColor;
-		ctx->savedType = ctx->settings->overlayType;
-
 		CheckDlgButton(dialog, IDC_CHK_AUTOSTART,
 			(ctx->settings->isFirstLaunch || GetAutoStart()) ? BST_CHECKED : BST_UNCHECKED);
+		ctx->settings->isFirstLaunch = false;
 
 		const auto hCombo = GetDlgItem(dialog, IDC_CMB_OVERLAY);
 		SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)L"Top");
@@ -245,8 +243,11 @@ INT_PTR CALLBACK Settings::DlgProc(HWND dialog, UINT msg, WPARAM wParam, LPARAM 
 
 		case IDC_BTN_EXIT:
 		{
+			const bool autoStart = IsDlgButtonChecked(dialog, IDC_CHK_AUTOSTART) == BST_CHECKED;
+			SetAutoStart(autoStart);
+			ctx->settings->Save();
 			const auto parent = GetParent(dialog);
-			EndDialog(dialog, IDCANCEL);
+			EndDialog(dialog, IDOK);
 			PostMessage(parent, WM_COMMAND, IDM_EXIT, 0);
 			return TRUE;
 		}

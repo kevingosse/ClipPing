@@ -36,8 +36,6 @@ private:
 	{
 		Settings* settings;
 		Overlay* overlay;
-		COLORREF savedColor = 0;
-		OverlayType savedType = OverlayTop;
 
 		DlgContext(Settings* s, Overlay* o) : settings(s), overlay(o) {}
 	};
