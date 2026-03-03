@@ -6,8 +6,8 @@ IDI_CLIPPING ICON "clipboard.ico"
 1 24 "app.manifest"
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     2,1,0,0
-PRODUCTVERSION  2,1,0,0
+FILEVERSION     2,2,0,0
+PRODUCTVERSION  2,2,0,0
 FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
 FILEFLAGS       0
 FILEOS          VOS__WINDOWS32
@@ -20,11 +20,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName",      "Kevin Gosse"
             VALUE "FileDescription",  "ClipPing"
-            VALUE "FileVersion",      "2.1.0.0"
+            VALUE "FileVersion",      "2.2.0.0"
             VALUE "InternalName",     "ClipPing"
             VALUE "OriginalFilename", "ClipPing.exe"
             VALUE "ProductName",      "ClipPing"
-            VALUE "ProductVersion",   "2.1.0.0"
+            VALUE "ProductVersion",   "2.2.0.0"
             VALUE "LegalCopyright",   "Kevin Gosse"
         END
     END
