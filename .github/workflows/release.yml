@@ -92,5 +92,6 @@ jobs:
           tag_name: v${{ inputs.version }}
           files: |
             build/ClipPing.exe
+            build/ClipPing.pdb
             build/ClipPing-Setup.exe
           generate_release_notes: true
