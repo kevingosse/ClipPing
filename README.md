@@ -1,18 +1,71 @@
-# clip-ping
-Displays a visual notification in the active window when the clipboard is updated.
+# ClipPing
 
-Launching the app adds an icon in the tray. Right-click -> Exit to exit.
+Visual clipboard notification for Windows. ClipPing displays a brief overlay on your active window whenever the clipboard is updated, giving you instant visual feedback that your copy operation worked.
 
-The app is written with .NET 9 and requires at least Windows 10 version 1607.
+<!-- TODO: Add a GIF/screenshot showing the overlay in action -->
 
-QoL features are not implemented yet (no way to customize the overlay, no way to launch automatically the app at startup). There are two overlays implemented, the default one is a halo on top of the window. 
+## Installation
 
-![image](https://github.com/user-attachments/assets/56f44df4-d972-481d-ba22-bf8e1b62b7e9)
+### Winget (recommended)
 
-The other overlay is a thin border around the window.
+```
+winget install KevinGosse.ClipPing
+```
 
-![image](https://github.com/user-attachments/assets/ca98089e-72f4-4f8c-8d73-5c16ac7cb846)
+### Installer
 
-Though it's mostly used to debug the overlay area, you can enable the border overlay by editing the code.
-In `App.xaml.cs`, replace `new TopOverlay` with `new BorderOverlay`.
+Download `ClipPing-Setup.exe` from the [latest release](https://github.com/kevingosse/ClipPing/releases/latest).
 
+### Portable
+
+Download `ClipPing.exe` from the [latest release](https://github.com/kevingosse/ClipPing/releases/latest) and run it directly. No installation required.
+
+## Usage
+
+ClipPing runs in the background with an icon in the system tray. Every time you copy something, a brief visual overlay flashes on your active window.
+
+Right-click the tray icon to access:
+- **Settings** - Configure overlay appearance and behavior
+- **About** - Version and links
+- **Exit** - Close ClipPing
+
+Double-click the tray icon to open the settings dialog.
+
+## Overlay types
+
+ClipPing comes with 6 overlay styles. You can pick the one you prefer and customize the color from the settings dialog.
+
+| Overlay | Description |
+|---------|-------------|
+| Top | Gradient bar at the top of the window (default) |
+| Bottom | Gradient bar at the bottom |
+| Left | Gradient bar on the left edge |
+| Right | Gradient bar on the right edge |
+| Border | Solid border around the entire window |
+| Aura | Glowing gradient on all edges |
+
+<!-- TODO: Add screenshots of each overlay type -->
+
+## Settings
+
+<!-- TODO: Add screenshot of the settings dialog -->
+
+- **Overlay color** - Pick any color using the color chooser
+- **Overlay type** - Select one of the 6 overlay styles
+- **Preview** - Preview your settings in real-time before applying
+- **Start with Windows** - Launch ClipPing automatically at login
+
+Settings are stored in `%LOCALAPPDATA%\ClipPing\settings.ini`.
+
+## Requirements
+
+- Windows 10 version 1607 or later
+- x64
+
+## Building from source
+
+Open `src/ClipPing.sln` in Visual Studio 2025 and build the Release/x64 configuration. The output is placed in the `build/` directory.
+
+## License
+
+[MIT](LICENSE)
