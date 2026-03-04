@@ -1,4 +1,5 @@
-# ClipPing
+# <img width="48" height="48" alt="clipboard" src="https://github.com/user-attachments/assets/45f546a7-ed7b-4d29-838a-8f88bd693247" /> ClipPing
+
 
 Visual clipboard notification for Windows. ClipPing displays a brief overlay on your active window whenever the clipboard is updated, giving you instant visual feedback that your copy operation worked.
 
