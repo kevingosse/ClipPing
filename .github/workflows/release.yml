@@ -1,9 +1,12 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 2.4.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -14,6 +17,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate version
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ inputs.version }}"
+
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format '$version'. Expected x.y.z (e.g. 2.4.0)"
+            exit 1
+          fi
+
+          IFS='.' read -r new_major new_minor new_patch <<< "$version"
+
+          latest_tag=$(gh release view --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ -n "$latest_tag" ]; then
+            latest="${latest_tag#v}"
+            IFS='.' read -r cur_major cur_minor cur_patch <<< "$latest"
+
+            if [ "$new_major" -lt "$cur_major" ] || \
+               { [ "$new_major" -eq "$cur_major" ] && [ "$new_minor" -lt "$cur_minor" ]; } || \
+               { [ "$new_major" -eq "$cur_major" ] && [ "$new_minor" -eq "$cur_minor" ] && [ "$new_patch" -le "$cur_patch" ]; }; then
+              echo "::error::Version $version must be strictly greater than current release $latest"
+              exit 1
+            fi
+          fi
+
+          echo "Version $version validated successfully"
+
+      - name: Update version in RC file
+        shell: pwsh
+        run: |
+          $file = "src/ClipPing/ClipPing.rc"
+          $encoding = [System.Text.Encoding]::Unicode
+          $content = [System.IO.File]::ReadAllText($file, $encoding)
+
+          $version = "${{ inputs.version }}"
+          $parts = $version.Split('.')
+          $commaVersion = "$($parts[0]),$($parts[1]),$($parts[2]),0"
+          $dotVersion = "$($parts[0]).$($parts[1]).$($parts[2]).0"
+
+          $content = $content -replace 'FILEVERSION\s+\d+,\d+,\d+,\d+', "FILEVERSION        $commaVersion"
+          $content = $content -replace 'PRODUCTVERSION\s+\d+,\d+,\d+,\d+', "PRODUCTVERSION     $commaVersion"
+          $content = $content -replace '"FileVersion",\s*"[\d.]+"', "`"FileVersion`",            `"$dotVersion`""
+          $content = $content -replace '"ProductVersion",\s*"[\d.]+"', "`"ProductVersion`",        `"$dotVersion`""
+
+          [System.IO.File]::WriteAllText($file, $content, $encoding)
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/ClipPing/ClipPing.rc
+          git commit -m "Bump version to ${{ inputs.version }}"
+          git tag "v${{ inputs.version }}"
+          git push origin HEAD "v${{ inputs.version }}"
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
@@ -23,43 +83,15 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup -y
 
-      - name: Extract version from tag
-        id: version
-        shell: bash
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
       - name: Build installer
-        run: iscc /DMyAppVersion=${{ steps.version.outputs.version }} installer.iss
+        run: iscc /DMyAppVersion=${{ inputs.version }} installer.iss
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ inputs.version }}
           files: |
             build/ClipPing.exe
+            build/ClipPing.pdb
             build/ClipPing-Setup.exe
           generate_release_notes: true
-
-  winget:
-    if: false # Re-enable after manually submitting the inno manifest to winget-pkgs for v2.2.0
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - name: Extract version from tag
-        id: version
-        shell: bash
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
-      - name: Download wingetcreate
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-
-      - name: Update WinGet package
-        shell: pwsh
-        run: |
-          $url = "https://github.com/kevingosse/ClipPing/releases/download/${{ github.ref_name }}/ClipPing-Setup.exe|x64"
-          .\wingetcreate.exe update KevinGosse.ClipPing `
-            --version ${{ steps.version.outputs.version }} `
-            --urls $url `
-            --token ${{ secrets.WINGET_PAT }} `
-            --submit
