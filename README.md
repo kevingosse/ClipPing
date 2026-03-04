@@ -2,7 +2,7 @@
 
 Visual clipboard notification for Windows. ClipPing displays a brief overlay on your active window whenever the clipboard is updated, giving you instant visual feedback that your copy operation worked.
 
-<!-- TODO: Add a GIF/screenshot showing the overlay in action -->
+https://github.com/user-attachments/assets/38db2a32-c694-41a0-b3d8-7532220ffee9
 
 ## Installation
 
